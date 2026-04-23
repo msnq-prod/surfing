@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #003153;
+  --color-sand: #F5F2ED;
+  --color-accent: #FF8C61;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-sand);
+  color: var(--color-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 49, 83, 0.2);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 49, 83, 0.4);
+}
+
+/* Leaflet Overrides */
+.leaflet-container {
+  font-family: var(--font-sans);
+}
+.leaflet-popup-content-wrapper {
+  background: #fff;
+  color: #003153;
+  border-radius: 4px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 49, 83, 0.1);
+}
+.leaflet-popup-tip {
+  background: #fff;
+}
+.custom-marker {
+  background: transparent;
+  border: none;
+}
