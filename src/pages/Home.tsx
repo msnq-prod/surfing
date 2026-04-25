@@ -1,10 +1,12 @@
+import { Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { MapContainer, TileLayer, Marker, ZoomControl, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useLanguage } from "../contexts/LanguageContext";
+import { BookingModal } from "../components/BookingModal";
 
 // Fix Leaflet icons (standard issue with webpack/vite)
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -17,7 +19,7 @@ L.Icon.Default.mergeOptions({
 // Custom Bright Marker for Schools
 const schoolMarker = L.divIcon({
   className: 'custom-marker',
-  html: `<div class="w-8 h-8 bg-accent rounded-full border-4 border-white shadow-lg flex items-center justify-center relative"><div class="absolute inset-0 rounded-full bg-accent animate-ping opacity-50"></div></div>`,
+  html: `<div class="w-8 h-8 bg-accent rounded-full border-4 border-white shadow-lg flex items-center justify-center relative"></div>`,
   iconSize: [32, 32],
   iconAnchor: [16, 16],
   popupAnchor: [0, -16]
@@ -48,8 +50,36 @@ function MapCenterer({ activeLocation }: { activeLocation: any }) {
 export function Home() {
   const [activeLocation, setActiveLocation] = useState<any>(null);
   const [activeHotel, setActiveHotel] = useState<any>(null);
+  const [activeRate, setActiveRate] = useState<"single" | "group" | "club">("single");
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
   const teamScrollRef = useRef<HTMLDivElement>(null);
+  const ratesRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ratesRef,
+    offset: ["start end", "end start"]
+  });
+
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
   const { t } = useLanguage();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const rateParam = params.get('rate');
+    if (rateParam === 'club' || rateParam === 'group' || rateParam === 'single') {
+      setActiveRate(rateParam as any);
+    }
+    
+    // Handle hash anchor scrolling
+    if (window.location.hash) {
+      const id = window.location.hash.substring(1);
+      const element = document.getElementById(id);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }, []);
 
   const fadeUp = {
     hidden: { opacity: 0, y: 20 },
@@ -61,19 +91,22 @@ export function Home() {
       id: "russia", 
       title: t("home.map.ru.title"), 
       coords: [54.958, 20.473] as [number, number],
-      intro: t("home.map.ru.intro")
+      intro: t("home.map.ru.intro"),
+      country: t("home.map.ru.country")
     },
     { 
       id: "srilanka", 
       title: t("home.map.sri.title"), 
       coords: [5.973, 80.428] as [number, number],
-      intro: t("home.map.sri.intro")
+      intro: t("home.map.sri.intro"),
+      country: t("home.map.sri.country")
     },
     { 
       id: "indo", 
       title: t("home.map.indo.title"), 
       coords: [-8.650, 115.130] as [number, number],
-      intro: t("home.map.indo.intro")
+      intro: t("home.map.indo.intro"),
+      country: t("home.map.indo.country")
     }
   ];
 
@@ -118,7 +151,13 @@ export function Home() {
             <p className="text-[14px] leading-[1.6] opacity-80 mb-8 max-w-sm">
               {t("home.hero.desc")}
             </p>
-            <Button variant="secondary" className="w-fit">
+            <Button 
+              variant="secondary" 
+              className="w-fit"
+              onClick={() => {
+                document.getElementById('rates')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               {t("home.hero.button")}
             </Button>
           </motion.div>
@@ -126,65 +165,153 @@ export function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="w-full bg-gradient-to-b from-sand via-white to-sand px-6 md:px-12 py-16 md:py-24">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+      <section className="w-full bg-gradient-to-b from-sand via-white to-sand px-6 md:px-12 py-32 md:py-56">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-24">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ delay: 0.1 }} className="flex flex-col items-center text-center">
-              <div className="flex items-center justify-center mb-6 text-accent">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1S7 6.5 8 6a6.1 6.1 0 0 1 8 0c1 .5 1.5 1 2.5 1s2-.5 2.5-1"/><path d="M2 12c.6.5 1.2 1 2.5 1S7 12.5 8 12a6.1 6.1 0 0 1 8 0c1 .5 1.5 1 2.5 1s2-.5 2.5-1"/><path d="M2 18c.6.5 1.2 1 2.5 1S7 18.5 8 18a6.1 6.1 0 0 1 8 0c1 .5 1.5 1 2.5 1s2-.5 2.5-1"/></svg>
+              <div className="flex items-center justify-center mb-8 text-accent scale-[1.5]">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1S7 6.5 8 6a6.1 6.1 0 0 1 8 0c1 .5 1.5 1 2.5 1s2-.5 2.5-1"/><path d="M2 12c.6.5 1.2 1 2.5 1S7 12.5 8 12a6.1 6.1 0 0 1 8 0c1 .5 1.5 1 2.5 1s2-.5 2.5-1"/><path d="M2 18c.6.5 1.2 1 2.5 1S7 18.5 8 18a6.1 6.1 0 0 1 8 0c1 .5 1.5 1 2.5 1s2-.5 2.5-1"/></svg>
               </div>
-              <h3 className="tracking-wide font-medium text-[16px] mb-4">{t("home.features.item1.title")}</h3>
-              <p className="text-[14px] md:text-[15px] leading-[1.6] opacity-70 max-w-[280px] mx-auto">{t("home.features.item1.desc")}</p>
+              <h3 className="tracking-wide font-medium text-[22px] md:text-[24px] mb-6">{t("home.features.item1.title")}</h3>
+              <p className="text-[16px] md:text-[18px] leading-[1.8] opacity-70 max-w-[320px] mx-auto">{t("home.features.item1.desc")}</p>
             </motion.div>
             
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ delay: 0.2 }} className="flex flex-col items-center text-center">
-              <div className="flex items-center justify-center mb-6 text-accent">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <div className="flex items-center justify-center mb-8 text-accent scale-[1.5]">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               </div>
-              <h3 className="tracking-wide font-medium text-[16px] mb-4">{t("home.features.item2.title")}</h3>
-              <p className="text-[14px] md:text-[15px] leading-[1.6] opacity-70 max-w-[280px] mx-auto">{t("home.features.item2.desc")}</p>
+              <h3 className="tracking-wide font-medium text-[22px] md:text-[24px] mb-6">{t("home.features.item2.title")}</h3>
+              <p className="text-[16px] md:text-[18px] leading-[1.8] opacity-70 max-w-[320px] mx-auto">{t("home.features.item2.desc")}</p>
             </motion.div>
             
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ delay: 0.3 }} className="flex flex-col items-center text-center">
-              <div className="flex items-center justify-center mb-6 text-accent">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              <div className="flex items-center justify-center mb-8 text-accent scale-[1.5]">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
               </div>
-              <h3 className="tracking-wide font-medium text-[16px] mb-4">{t("home.features.item3.title")}</h3>
-              <p className="text-[14px] md:text-[15px] leading-[1.6] opacity-70 max-w-[280px] mx-auto">{t("home.features.item3.desc")}</p>
+              <h3 className="tracking-wide font-medium text-[22px] md:text-[24px] mb-6">{t("home.features.item3.title")}</h3>
+              <p className="text-[16px] md:text-[18px] leading-[1.8] opacity-70 max-w-[320px] mx-auto">{t("home.features.item3.desc")}</p>
             </motion.div>
           </div>
         </div>
       </section>
 
+      {/* Rates Section */}
+      <section id="rates" ref={ratesRef} className="w-full py-24 md:py-32 px-6 md:px-12 border-y border-primary/5 relative overflow-hidden bg-white">
+        {/* Parallax Background Reveal */}
+        <div className="absolute inset-0 z-0">
+          <motion.div 
+            style={{ y: backgroundY }}
+            className="absolute inset-x-0 -top-[30%] -bottom-[30%] w-full h-[160%]"
+          >
+            <img 
+              src="https://images.unsplash.com/photo-1414609303925-50284ab91677?auto=format&fit=crop&w=1600&q=80"
+              alt="Sunset Waves"
+              className="w-full h-full object-cover blur-[8px] scale-110 brightness-50 contrast-125"
+              referrerPolicy="no-referrer"
+            />
+            {/* Darkening and artistic overlays */}
+            <div className="absolute inset-0 bg-black/50 mix-blend-multiply"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white opacity-100 pointer-events-none"></div>
+            {/* Direct top/bottom fade for clean sections transitions */}
+            <div className="absolute inset-x-0 top-0 h-[20%] bg-gradient-to-b from-white to-transparent z-10"></div>
+            <div className="absolute inset-x-0 bottom-0 h-[20%] bg-gradient-to-t from-white to-transparent z-10"></div>
+          </motion.div>
+        </div>
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="text-[11px] uppercase tracking-[2px] font-bold mb-8 text-accent opacity-90 text-center drop-shadow-sm">{t("home.rates.title")}</div>
+          
+          <div className="flex justify-center gap-4 md:gap-12 mb-16 border-b border-white/20">
+            {(["single", "group", "club"] as const).map((rate) => (
+              <button
+                key={rate}
+                onClick={() => setActiveRate(rate)}
+                className={`pb-4 text-[14px] md:text-[18px] uppercase tracking-widest transition-all relative ${
+                  activeRate === rate ? "text-white opacity-100 font-medium" : "text-white/40 hover:text-white/60"
+                }`}
+              >
+                {t(`home.rates.${rate}.title`)}
+                {activeRate === rate && (
+                  <motion.div layoutId="rate-underline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent shadow-[0_0_10px_rgba(var(--color-accent),0.5)]" />
+                )}
+              </button>
+            ))}
+          </div>
+
+          <motion.div 
+            key={activeRate}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center"
+          >
+            <div className="aspect-[3/4] md:aspect-[4/5] rounded-[4px] overflow-hidden bg-primary/10 relative group shadow-2xl">
+              <img 
+                src={
+                  activeRate === "single" 
+                    ? "https://images.unsplash.com/photo-1528150177508-7cc0c36cda5c?auto=format&fit=crop&w=1200&q=80" 
+                    : activeRate === "group"
+                    ? "https://images.unsplash.com/photo-1533038590840-1cde6e668a91?auto=format&fit=crop&w=1200&q=80"
+                    : "https://images.unsplash.com/photo-1544923246-77307dd654ca?auto=format&fit=crop&w=1200&q=80"
+                } 
+                alt={t(`home.rates.${activeRate}.title`)} 
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+              <div className="absolute bottom-10 left-10 text-white z-10">
+                <div className="text-[32px] md:text-[40px] font-medium tracking-tight leading-tight" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+                  {t(`home.rates.${activeRate}.price`)}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col py-4 text-white">
+              <h2 className="text-[36px] md:text-[48px] font-light mb-8 leading-tight tracking-tight">{t(`home.rates.${activeRate}.title`)}</h2>
+              <p className="text-[16px] md:text-[19px] leading-relaxed opacity-80 mb-12 max-w-md">
+                {t(`home.rates.${activeRate}.desc`)}
+              </p>
+              <Button 
+                className="w-fit h-16 px-12 text-[14px] tracking-widest uppercase bg-accent hover:bg-accent/90 transition-all shadow-xl hover:shadow-accent/40 border-none"
+                onClick={() => setIsBookingOpen(true)}
+              >
+                {t("home.rates.button")}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Team - Full Width Section */}
-      <section className="w-full p-6 md:p-12 relative">
+      <section className="w-full p-6 md:p-12 relative overflow-hidden">
         <div className="text-[11px] uppercase tracking-[1px] font-semibold mb-[30px] opacity-50 text-center md:text-left">{t("home.team.title")}</div>
-        <div className="relative group/slider">
+        <div className="relative group/slider max-w-7xl mx-auto">
           <div 
             ref={teamScrollRef}
-            className="flex overflow-x-auto snap-x snap-mandatory gap-2 md:gap-4 no-scrollbar pb-4"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            className="flex overflow-hidden gap-2 md:gap-4 no-scrollbar pb-4"
           >
             {[
-              { name: "Антон В.", role: t("home.team.role.head"), img: "https://images.unsplash.com/photo-1526367790939-0d3221e54c86?auto=format&fit=crop&w=800&q=80" },
-              { name: "Марина С.", role: t("home.team.role.yoga"), img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80" },
-              { name: "Кристиан К.", role: t("home.team.role.longboard"), img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80" },
-              { name: "Алекс Д.", role: t("home.team.role.shortboard", "SHORTBOARD"), img: "https://images.unsplash.com/photo-1533000787361-9c1cd3cb15bf?auto=format&fit=crop&w=800&q=80" },
-              { name: "Лена О.", role: t("home.team.role.beginner", "BEGINNER COACH"), img: "https://images.unsplash.com/photo-1530669212001-f1eb9c0b11fd?auto=format&fit=crop&w=800&q=80" }
+              { name: "Антон", role: t("home.team.role.head"), img: "https://images.unsplash.com/photo-1502933691298-84fc14542831?auto=format&fit=crop&w=800&q=80" },
+              { name: "Марина", role: t("home.team.role.yoga"), img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80" },
+              { name: "Кристиан", role: t("home.team.role.longboard"), img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80" },
+              { name: "Алекс", role: t("home.team.role.shortboard", "SHORTBOARD"), img: "https://images.unsplash.com/photo-1533000787361-9c1cd3cb15bf?auto=format&fit=crop&w=800&q=80" },
+              { name: "Лена", role: t("home.team.role.beginner", "BEGINNER COACH"), img: "https://images.unsplash.com/photo-1530669212001-f1eb9c0b11fd?auto=format&fit=crop&w=800&q=80" }
             ].map((coach, i) => (
               <motion.div 
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ delay: i * 0.1 }}
                 key={i} 
-                className="snap-start shrink-0 w-[85vw] sm:w-[calc(50%-4px)] md:w-[calc(33.333%-11px)] group cursor-pointer flex flex-col relative aspect-[3/4]"
+                className="shrink-0 w-[280px] md:w-[350px] flex flex-col relative aspect-[3/4]"
               >
-                <div className="w-full h-full rounded-[4px] overflow-hidden bg-primary/10 relative">
-                  <img 
+                <div className="w-full h-full rounded-[4px] overflow-hidden bg-primary/10 relative group">
+                  <motion.img 
+                    whileHover={{ scale: 1.08 }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                     src={coach.img} 
                     alt={coach.name} 
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]" 
+                    className="w-full h-full object-cover" 
                     referrerPolicy="no-referrer" 
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-500"></div>
                   <div className="absolute bottom-6 left-6 text-white z-10">
                     <div className="text-[20px] font-medium tracking-tight" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>{coach.name}</div>
                     <div className="text-[11px] text-white/80 mt-1 uppercase tracking-[1.5px]" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>{coach.role}</div>
@@ -193,6 +320,18 @@ export function Home() {
               </motion.div>
             ))}
           </div>
+            
+            <button 
+              onClick={() => {
+                if (teamScrollRef.current) {
+                  teamScrollRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+                }
+              }}
+              className="absolute -left-2 md:-left-12 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-primary transition-all duration-300 z-10 hover:scale-110"
+            >
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+
             <button 
               onClick={() => {
                 if (teamScrollRef.current) {
@@ -203,19 +342,18 @@ export function Home() {
                   if (scrollLeft + clientWidth >= scrollWidth - 10) {
                      teamScrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
                   } else {
-                     const scrollAmount = clientWidth / 1.5;
-                     teamScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                     teamScrollRef.current.scrollBy({ left: 320, behavior: 'smooth' });
                   }
                 }
               }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-white opacity-0 md:opacity-100 transition-all duration-300 z-10 hover:scale-110"
+              className="absolute -right-2 md:-right-12 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-primary transition-all duration-300 z-10 hover:scale-110"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </button>
         </div>
       </section>
 
-      {/* Classes info full banner */}
+      {/* Merch Section - Banner */}
       <section className="w-full border-b border-primary/10 p-6 md:p-12 bg-white flex flex-col md:flex-row gap-8 items-start md:items-center justify-between">
         <div className="max-w-xl">
            <div className="text-[11px] uppercase tracking-[1px] font-semibold mb-[15px] opacity-50">{t("home.classes.subtitle")}</div>
@@ -224,7 +362,9 @@ export function Home() {
              {t("home.classes.desc")}
            </p>
         </div>
-        <Button variant="outline" className="shrink-0 h-12 px-8">{t("home.classes.button")}</Button>
+        <Link to="/store">
+          <Button variant="outline" className="shrink-0 h-12 px-8">{t("home.classes.button")}</Button>
+        </Link>
       </section>
 
       {/* Full Screen Interactive Map Section */}
@@ -232,11 +372,16 @@ export function Home() {
         <div className="absolute top-8 left-8 z-10 bg-white/95 backdrop-blur p-6 shadow-xl rounded-[4px] border border-primary/10 w-[320px] max-w-[calc(100vw-4rem)] min-h-[160px] transition-all duration-300 pointer-events-auto">
               {activeLocation ? (
                 <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} key={activeLocation.id}>
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-[10px] uppercase tracking-[2px] font-semibold opacity-70">
-                      {activeLocation.id}
-                    </span>
-                    <div className="flex gap-1">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex flex-col">
+                      <span className="text-[11px] uppercase tracking-[2px] font-bold">
+                        {activeLocation.country}
+                      </span>
+                      <span className="text-[9px] uppercase tracking-[1px] font-medium text-gray-400 whitespace-nowrap">
+                        {activeLocation.coords[0].toFixed(3)}° {activeLocation.coords[0] >= 0 ? 'N' : 'S'}, {activeLocation.coords[1].toFixed(3)}° {activeLocation.coords[1] >= 0 ? 'E' : 'W'}
+                      </span>
+                    </div>
+                    <div className="flex gap-1 shrink-0 pt-0.5">
                       <button 
                         onClick={() => {
                           const currentIndex = locations.findIndex(l => l.id === activeLocation.id);
@@ -260,9 +405,7 @@ export function Home() {
                     </div>
                   </div>
                   <h2 className="text-[24px] font-light mb-1 leading-tight">{activeLocation.title}</h2>
-                  <div className="text-[11px] font-mono opacity-50 mb-4 pb-4 border-b border-primary/10 tracking-widest">
-                    {Math.abs(activeLocation.coords[0]).toFixed(3)}° {activeLocation.coords[0] >= 0 ? 'N' : 'S'} / {Math.abs(activeLocation.coords[1]).toFixed(3)}° {activeLocation.coords[1] >= 0 ? 'E' : 'W'}
-                  </div>
+                  <div className="mb-4"></div>
                   <p className="text-[13px] opacity-80 leading-relaxed text-balance">
                     {activeLocation.intro}
                   </p>
@@ -289,7 +432,7 @@ export function Home() {
               attributionControl={false}
             >
               <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
               />
               <ZoomControl position="bottomright" />
               <MapCenterer activeLocation={activeLocation} />
@@ -305,6 +448,12 @@ export function Home() {
           )}
         </div>
       </section>
+
+      <BookingModal 
+        isOpen={isBookingOpen} 
+        onClose={() => setIsBookingOpen(false)} 
+        rateName={t(`home.rates.${activeRate}.title`)}
+      />
     </div>
   );
 }

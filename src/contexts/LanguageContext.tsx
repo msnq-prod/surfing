@@ -15,12 +15,16 @@ const translations: Record<string, Record<Language, string>> = {
   "nav.store": { RU: "Магазин", EN: "Store" },
   "footer.contact": { RU: "Связь", EN: "Contact" },
   "footer.social": { RU: "Соцсети", EN: "Socials" },
+  "footer.support": { RU: "Поддержка", EN: "Support" },
+  "footer.locations.title": { RU: "Локации", EN: "Locations" },
+  "footer.locations.list": { RU: "Зеленоградск, Шри-Ланка, Бали", EN: "Zelenogradsk, Sri Lanka, Bali" },
+  "footer.email": { RU: "info@mysserf.com", EN: "info@mysserf.com" },
   "footer.rights": { RU: "© 2026 Школа «МЫС»\nЛицензия №12-445", EN: "© 2026 MYS School\nLicense №12-445" },
   "footer.design": { RU: "Дизайн и разработка", EN: "Design and Development" },
 
   // Home page
   "home.hero.intro": { RU: "Осознанный гедонизм", EN: "Conscious hedonism" },
-  "home.hero.title": { RU: "Солнечная\nмеланхолия\nна воде", EN: "Sunny\nmelancholia\non the water" },
+  "home.hero.title": { RU: "Твоя\nАкадемия\nсерфинга", EN: "Your\nSurf\nAcademy" },
   "home.hero.desc": { RU: "Пространство для тех, кто ищет баланс между спортом и глубоким расслаблением. Мы учим чувствовать море, а не просто покорять его.", EN: "A space for those seeking balance between sport and deep relaxation. We teach to feel the sea, not just conquer it." },
   "home.hero.button": { RU: "Выбрать курс", EN: "Choose a course" },
   "home.hero.loc": { RU: "Локация: Мыс Фиолент", EN: "Location: Cape Fiolent" },
@@ -39,10 +43,22 @@ const translations: Record<string, Record<Language, string>> = {
   "home.team.role.yoga": { RU: "Йога-серф", EN: "Yoga-surf" },
   "home.team.role.longboard": { RU: "Лонгборд", EN: "Longboard" },
 
-  "home.classes.subtitle": { RU: "Наши направления", EN: "Our directions" },
-  "home.classes.title": { RU: "От первых шагов до продвинутых спотов", EN: "From first steps to advanced spots" },
-  "home.classes.desc": { RU: "Мы предлагаем программы для любого уровня. Оттачиваем маневры, учимся читать лайн-ап и покорять более резкие волны. Регулярные выезды на секретные локации с лучшими наставниками.", EN: "We offer programs for any level. Honing maneuvers, learning to read the line-up and conquer sharper waves. Regular trips to secret locations with the best mentors." },
-  "home.classes.button": { RU: "Записаться на курс", EN: "Enroll in a course" },
+  "home.classes.subtitle": { RU: "Наш мерч", EN: "Our merch" },
+  "home.classes.title": { RU: "Эстетика серфинга в каждой детали", EN: "Surf aesthetics in every detail" },
+  "home.classes.desc": { RU: "Мы создаем вещи, которые приятно носить как в океане, так и в городе. Качественные ткани, минималистичный дизайн и дух свободы в каждом шве. От технологичных лайкр до уютных худи для закатных посиделок.", EN: "We create things that are pleasant to wear both in the ocean and in the city. Quality fabrics, minimalist design, and the spirit of freedom in every stitch. From tech rashguards to cozy hoodies for sunset hangouts." },
+  "home.classes.button": { RU: "Перейти в магазин", EN: "Go to store" },
+  
+  "home.rates.title": { RU: "Тарифы", EN: "Rates" },
+  "home.rates.single.title": { RU: "Одиночный", EN: "Single" },
+  "home.rates.group.title": { RU: "Групповой", EN: "Group" },
+  "home.rates.club.title": { RU: "Клубный", EN: "Club" },
+  "home.rates.single.desc": { RU: "Индивидуальное занятие с тренером. Полное внимание к вашей технике, разбор ошибок и быстрый прогресс.", EN: "Private lesson with a coach. Full attention to your technique, error analysis, and fast progress." },
+  "home.rates.group.desc": { RU: "Занятие в мини-группе до 4 человек. Веселая атмосфера, новые знакомства и поддержка единомышленников.", EN: "Mini-group lesson up to 4 people. Fun atmosphere, new acquaintances, and support from like-minded people." },
+  "home.rates.club.desc": { RU: "Безлимитный доступ к оборудованию, участие в закрытых мероприятиях и скидки на все выезды школы.", EN: "Unlimited equipment access, participation in private events, and discounts on all school trips." },
+  "home.rates.single.price": { RU: "5 500 ₽", EN: "5 500 ₽" },
+  "home.rates.group.price": { RU: "3 500 ₽", EN: "3 500 ₽" },
+  "home.rates.club.price": { RU: "15 000 ₽ / мес", EN: "15 000 ₽ / mo" },
+  "home.rates.button": { RU: "Записаться", EN: "Enroll" },
 
   "home.map.title": { RU: "Наши локации", EN: "Our locations" },
   "home.map.desc": { RU: "Чтобы получить необходимую информацию о школе, нажмите на любую из меток", EN: "Click on any marker to get information about the school" },
@@ -81,10 +97,10 @@ const translations: Record<string, Record<Language, string>> = {
   "store.item6.price": { RU: "От 5 000 ₽", EN: "From 5 000 ₽" },
   
   "store.btn.cart": { RU: "В корзину", EN: "Add to cart" },
-  "store.booking.subtitle": { RU: "Присоединяйтесь", EN: "Join in" },
-  "store.booking.title": { RU: "Забронировать класс", EN: "Book a class" },
-  "store.booking.desc": { RU: "Оставьте заявку, и наш менеджер свяжется с вами для подбора идеальной программы и дат.", EN: "Leave a request, and our manager will contact you to select perfect program and dates." },
-  "store.booking.btn": { RU: "Оставить заявку", EN: "Send request" },
+  "store.booking.subtitle": { RU: "Клуб МЫС", EN: "MYS Club" },
+  "store.booking.title": { RU: "Особые условия", EN: "Special conditions" },
+  "store.booking.desc": { RU: "Для членов клуба у нас действуют постоянные скидки на весь ассортимент лавки и приоритетное бронирование оборудования.", EN: "For club members, we have permanent discounts on the entire shop range and priority equipment booking." },
+  "store.booking.btn": { RU: "Узнать о клубе", EN: "Learn about the club" },
 
   // Community page
   "comm.subtitle": { RU: "Семья МЫС", EN: "MYS Family" },
@@ -95,7 +111,17 @@ const translations: Record<string, Record<Language, string>> = {
   "comm.chat.desc": { RU: "В наших Telegram-чатах мы договариваемся о совместных выездах, делимся прогнозами волн, продаем и покупаем б/у доски и просто болтаем. Выбери свою локацию и вливайся!", EN: "In our Telegram chats we organize joint trips, share wave forecasts, buy/sell used boards, and just chat. Choose your location and join in!" },
   "comm.chat.btn1": { RU: "Чат: Бали", EN: "Chat: Bali" },
   "comm.chat.btn2": { RU: "Чат: Шри-Ланка", EN: "Chat: Sri Lanka" },
-  "comm.chat.btn3": { RU: "Глобальный клуб", EN: "Global club" }
+  "comm.chat.btn3": { RU: "Глобальный клуб", EN: "Global club" },
+
+  // Booking Modal
+  "modal.booking.title": { RU: "Заявка на обучение", EN: "Booking request" },
+  "modal.booking.name": { RU: "Имя", EN: "Name" },
+  "modal.booking.phone": { RU: "Телефон", EN: "Phone" },
+  "modal.booking.email": { RU: "Почта", EN: "Email" },
+  "modal.booking.submit": { RU: "Отправить заявку", EN: "Send request" },
+  "modal.booking.success.title": { RU: "Заявка отправлена!", EN: "Request sent!" },
+  "modal.booking.success.desc": { RU: "Мы свяжемся с вами для уточнения деталей. Благодарим, что выбрали нас!", EN: "We will contact you to clarify details. Thank you for choosing us!" },
+  "modal.booking.close": { RU: "Закрыть", EN: "Close" }
 };
 
 const LanguageContext = createContext<LanguageContextType>({
