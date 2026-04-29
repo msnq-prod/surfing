@@ -25,42 +25,60 @@ const schoolMarker = L.divIcon({
   popupAnchor: [0, -16]
 });
 
-const airportMarker = L.divIcon({
-  className: 'custom-marker',
-  html: `<div class="w-8 h-8 bg-white rounded-full border-4 border-white shadow-lg flex items-center justify-center relative"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.6L3 8l6 4-3 3-3-1v2l4 2 2 4h2l-1-3 3-3 4 6l1.2-.7c.4-.2.7-.6.6-1.1Z"/></svg></div>`,
-  iconSize: [32, 32],
-  iconAnchor: [16, 16]
-});
-
-const hotelMarker = L.divIcon({
-  className: 'custom-marker',
-  html: `<div class="w-6 h-6 bg-white rounded-full border-[3px] border-white shadow-md flex items-center justify-center relative"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-secondary"><path d="M10 22v-6.57"/><path d="M12 11h.01"/><path d="M12 7h.01"/><path d="M14 15.43V22"/><path d="M15 16a5 5 0 0 0-6 0"/><path d="M16 11h.01"/><path d="M16 7h.01"/><path d="M8 11h.01"/><path d="M8 7h.01"/><rect x="4" y="2" width="16" height="20" rx="2"/></svg></div>`,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12]
-});
-
 function MapCenterer({ activeLocation }: { activeLocation: any }) {
   const map = useMap();
   useEffect(() => {
-    if (activeLocation) map.flyTo(activeLocation.coords, 6);
+    if (activeLocation) {
+      // Offset center to left so marker is somewhat centered in the left area, allowing space for right panel
+      // At zoom 5, 1 degree longitude is ~10-20 pixels depending on latitude. We can just pan to the coords and then apply a small offset.
+      map.flyTo(activeLocation.coords, 5, { duration: 1.5 });
+    }
   }, [activeLocation, map]);
   return null;
 }
 
 export function Home() {
-  const [activeLocation, setActiveLocation] = useState<any>(null);
-  const [activeHotel, setActiveHotel] = useState<any>(null);
+  const { t } = useLanguage();
+
+  const locations = [
+    { 
+      id: "russia", 
+      title: t("home.map.ru.title"), 
+      coords: [54.958, 20.473] as [number, number],
+      intro: t("home.map.ru.intro"),
+      country: t("home.map.ru.country"),
+      image: "https://images.unsplash.com/photo-1544923246-77307dd654ca?auto=format&fit=crop&w=800&q=80"
+    },
+    { 
+      id: "srilanka", 
+      title: t("home.map.sri.title"), 
+      coords: [5.973, 80.428] as [number, number],
+      intro: t("home.map.sri.intro"),
+      country: t("home.map.sri.country"),
+      image: "https://images.unsplash.com/photo-1533038590840-1cde6e668a91?auto=format&fit=crop&w=800&q=80"
+    },
+    { 
+      id: "indo", 
+      title: t("home.map.indo.title"), 
+      coords: [-8.650, 115.130] as [number, number],
+      intro: t("home.map.indo.intro"),
+      country: t("home.map.indo.country"),
+      image: "https://images.unsplash.com/photo-1528150177508-7cc0c36cda5c?auto=format&fit=crop&w=800&q=80"
+    }
+  ];
+
   const [activeRate, setActiveRate] = useState<"single" | "group" | "club">("single");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [activeLocation, setActiveLocation] = useState<any>(locations[0]);
   const teamScrollRef = useRef<HTMLDivElement>(null);
   const ratesRef = useRef<HTMLDivElement>(null);
+
   const { scrollYProgress } = useScroll({
     target: ratesRef,
     offset: ["start end", "end start"]
   });
 
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
-  const { t } = useLanguage();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -85,45 +103,6 @@ export function Home() {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
   };
-
-  const locations = [
-    { 
-      id: "russia", 
-      title: t("home.map.ru.title"), 
-      coords: [54.958, 20.473] as [number, number],
-      intro: t("home.map.ru.intro"),
-      country: t("home.map.ru.country")
-    },
-    { 
-      id: "srilanka", 
-      title: t("home.map.sri.title"), 
-      coords: [5.973, 80.428] as [number, number],
-      intro: t("home.map.sri.intro"),
-      country: t("home.map.sri.country")
-    },
-    { 
-      id: "indo", 
-      title: t("home.map.indo.title"), 
-      coords: [-8.650, 115.130] as [number, number],
-      intro: t("home.map.indo.intro"),
-      country: t("home.map.indo.country")
-    }
-  ];
-
-  const airports = [
-    { id: "kgd", name: "Khrabrovo Airport", coords: [54.8900, 20.5926] as [number, number] },
-    { id: "cmb", name: "Bandaranaike Intl Airport", coords: [7.1803, 79.8833] as [number, number] },
-    { id: "dps", name: "Ngurah Rai Intl Airport", coords: [-8.7482, 115.1675] as [number, number] },
-  ];
-
-  const hotels = [
-    { id: "ru_h1", name: "Zelenogradsk Spa Hotel", coords: [54.960, 20.470] as [number, number], schoolId: "russia" },
-    { id: "ru_h2", name: "Princess Elisa", coords: [54.955, 20.480] as [number, number], schoolId: "russia" },
-    { id: "sl_h1", name: "Weligama Bay Resort", coords: [5.970, 80.430] as [number, number], schoolId: "srilanka" },
-    { id: "sl_h2", name: "W15 Weligama", coords: [5.975, 80.420] as [number, number], schoolId: "srilanka" },
-    { id: "in_h1", name: "The Slow Canggu", coords: [-8.655, 115.135] as [number, number], schoolId: "indo" },
-    { id: "in_h2", name: "COMO Uma Canggu", coords: [-8.645, 115.125] as [number, number], schoolId: "indo" },
-  ];
 
   return (
     <div className="flex flex-col w-full">
@@ -195,90 +174,124 @@ export function Home() {
         </div>
       </section>
 
-      {/* Rates Section */}
-      <section id="rates" ref={ratesRef} className="w-full py-24 md:py-32 px-6 md:px-12 border-y border-primary/5 relative overflow-hidden bg-white">
-        {/* Parallax Background Reveal */}
-        <div className="absolute inset-0 z-0">
-          <motion.div 
-            style={{ y: backgroundY }}
-            className="absolute inset-x-0 -top-[30%] -bottom-[30%] w-full h-[160%]"
-          >
-            <img 
-              src="https://images.unsplash.com/photo-1414609303925-50284ab91677?auto=format&fit=crop&w=1600&q=80"
-              alt="Sunset Waves"
-              className="w-full h-full object-cover blur-[8px] scale-110 brightness-50 contrast-125"
-              referrerPolicy="no-referrer"
-            />
-            {/* Darkening and artistic overlays */}
-            <div className="absolute inset-0 bg-black/50 mix-blend-multiply"></div>
-            <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white opacity-100 pointer-events-none"></div>
-            {/* Direct top/bottom fade for clean sections transitions */}
-            <div className="absolute inset-x-0 top-0 h-[20%] bg-gradient-to-b from-white to-transparent z-10"></div>
-            <div className="absolute inset-x-0 bottom-0 h-[20%] bg-gradient-to-t from-white to-transparent z-10"></div>
-          </motion.div>
-        </div>
+      {/* Full Screen Interactive Map Section */}
+      <section id="rates" ref={ratesRef} className="w-full border-b border-primary/10 relative">
+        <div className="absolute top-8 right-8 z-10 bg-white/95 backdrop-blur shadow-2xl rounded-[12px] border border-primary/10 w-[340px] max-w-[calc(100vw-4rem)] flex flex-col overflow-hidden transition-all duration-300 pointer-events-auto">
+          {activeLocation ? (
+            <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} key={activeLocation.id} className="flex flex-col h-full">
+              {/* Image banner */}
+              <div className="w-full h-[140px] relative shrink-0">
+                <img 
+                  src={activeLocation.image} 
+                  alt={activeLocation.title} 
+                  className="w-full h-full object-cover" 
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+              </div>
 
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="text-[11px] uppercase tracking-[2px] font-bold mb-8 text-accent opacity-90 text-center drop-shadow-sm">{t("home.rates.title")}</div>
-          
-          <div className="flex justify-center gap-4 md:gap-12 mb-16 border-b border-white/20">
-            {(["single", "group", "club"] as const).map((rate) => (
-              <button
-                key={rate}
-                onClick={() => setActiveRate(rate)}
-                className={`pb-4 text-[14px] md:text-[18px] uppercase tracking-widest transition-all relative ${
-                  activeRate === rate ? "text-white opacity-100 font-medium" : "text-white/40 hover:text-white/60"
-                }`}
-              >
-                {t(`home.rates.${rate}.title`)}
-                {activeRate === rate && (
-                  <motion.div layoutId="rate-underline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent shadow-[0_0_10px_rgba(var(--color-accent),0.5)]" />
-                )}
-              </button>
-            ))}
-          </div>
+              {/* Content */}
+              <div className="p-6 flex flex-col grow">
+                <span className="text-[10px] uppercase tracking-[2px] font-bold text-gray-500 mb-1">
+                  {activeLocation.country}
+                </span>
 
-          <motion.div 
-            key={activeRate}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center"
-          >
-            <div className="aspect-[3/4] md:aspect-[4/5] rounded-[4px] overflow-hidden bg-primary/10 relative group shadow-2xl">
-              <img 
-                src={
-                  activeRate === "single" 
-                    ? "https://images.unsplash.com/photo-1528150177508-7cc0c36cda5c?auto=format&fit=crop&w=1200&q=80" 
-                    : activeRate === "group"
-                    ? "https://images.unsplash.com/photo-1533038590840-1cde6e668a91?auto=format&fit=crop&w=1200&q=80"
-                    : "https://images.unsplash.com/photo-1544923246-77307dd654ca?auto=format&fit=crop&w=1200&q=80"
-                } 
-                alt={t(`home.rates.${activeRate}.title`)} 
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-              <div className="absolute bottom-10 left-10 text-white z-10">
-                <div className="text-[32px] md:text-[40px] font-medium tracking-tight leading-tight" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
-                  {t(`home.rates.${activeRate}.price`)}
+                <div className="flex items-center justify-between mb-1">
+                  <h2 className="text-[22px] font-light text-primary leading-tight">{activeLocation.title}</h2>
+                  <button 
+                    onClick={() => {
+                      const currentIndex = locations.findIndex(l => l.id === activeLocation.id);
+                      const nextIndex = (currentIndex + 1) % locations.length;
+                      setActiveLocation(locations[nextIndex]);
+                    }}
+                    className="p-2 hover:bg-primary/5 rounded-full text-primary shrink-0 transition-colors"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                  </button>
+                </div>
+                
+                <span className="text-[10px] text-gray-400 mb-6 font-mono tracking-wider">
+                  {Math.abs(activeLocation.coords[0]).toFixed(3)}° {activeLocation.coords[0] >= 0 ? 'N' : 'S'}, {Math.abs(activeLocation.coords[1]).toFixed(3)}° {activeLocation.coords[1] >= 0 ? 'E' : 'W'}
+                </span>
+
+                {/* Rate Selector */}
+                <div className="flex flex-col border-t border-primary/10 pt-5 mt-auto">
+                  <div className="flex justify-between items-center mb-3">
+                    {/* Rate Selector Pills */}
+                    <div className="flex bg-primary/5 p-1 rounded-md w-full justify-between">
+                      {(["single", "group", "club"] as const).map(rate => (
+                        <button
+                          key={rate}
+                          onClick={() => setActiveRate(rate)}
+                          className={`flex-1 text-center py-1.5 text-[12px] uppercase tracking-wider rounded transition-all ${activeRate === rate ? 'bg-white shadow relative text-primary font-medium' : 'text-primary/50 hover:text-primary/70'}`}
+                        >
+                          {t(`home.rates.${rate}.title`)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-end justify-between mb-4">
+                     <span className="text-[24px] tracking-tight">{t(`home.rates.${activeRate}.price`)}</span>
+                  </div>
+
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex gap-2 text-[13px] opacity-80 leading-snug">
+                      <span className="text-accent">•</span> {t(`home.rates.${activeRate}.desc`)}
+                    </li>
+                  </ul>
+
+                  <Button 
+                    className="w-full text-[13px] tracking-widest uppercase bg-primary text-white hover:bg-primary/90 h-12"
+                    onClick={() => setIsBookingOpen(true)}
+                  >
+                    {t("home.rates.button")}
+                  </Button>
                 </div>
               </div>
-            </div>
-
-            <div className="flex flex-col py-4 text-white">
-              <h2 className="text-[36px] md:text-[48px] font-light mb-8 leading-tight tracking-tight">{t(`home.rates.${activeRate}.title`)}</h2>
-              <p className="text-[16px] md:text-[19px] leading-relaxed opacity-80 mb-12 max-w-md">
-                {t(`home.rates.${activeRate}.desc`)}
+            </motion.div>
+          ) : (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="default" className="flex flex-col justify-center h-full p-6 items-center text-center">
+              <h2 className="text-[20px] font-light mb-2 text-primary">{t("home.map.title") || "Select a location"}</h2>
+              <p className="text-[13px] opacity-70">
+                {t("home.map.desc") || "Click on a marker to see details"}
               </p>
-              <Button 
-                className="w-fit h-16 px-12 text-[14px] tracking-widest uppercase bg-accent hover:bg-accent/90 transition-all shadow-xl hover:shadow-accent/40 border-none"
-                onClick={() => setIsBookingOpen(true)}
-              >
-                {t("home.rates.button")}
-              </Button>
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
+        </div>
+
+        <div className="h-[75vh] min-h-[500px] w-full bg-primary/5 relative z-0">
+          {typeof window !== 'undefined' && (
+            <MapContainer 
+              center={[35.0, 60.0]} 
+              zoom={3} 
+              minZoom={2}
+              maxBounds={[[-85, -180], [85, 180]]}
+              maxBoundsViscosity={1.0}
+              scrollWheelZoom={false} 
+              dragging={true}
+              touchZoom={true}
+              className="w-full h-full cursor-grab active:cursor-grabbing"
+              zoomControl={false}
+              attributionControl={false}
+            >
+              <TileLayer
+                url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
+                bounds={[[-85, -180], [85, 180]]}
+                noWrap={true}
+              />
+              <ZoomControl position="bottomleft" />
+              <MapCenterer activeLocation={activeLocation} />
+              {locations.map((loc) => (
+                <Marker 
+                  key={loc.id} 
+                  position={loc.coords} 
+                  icon={schoolMarker}
+                  eventHandlers={{ click: () => setActiveLocation(loc) }}
+                />
+              ))}
+            </MapContainer>
+          )}
         </div>
       </section>
 
@@ -365,88 +378,6 @@ export function Home() {
         <Link to="/store">
           <Button variant="outline" className="shrink-0 h-12 px-8">{t("home.classes.button")}</Button>
         </Link>
-      </section>
-
-      {/* Full Screen Interactive Map Section */}
-      <section className="w-full border-b border-primary/10 relative">
-        <div className="absolute top-8 left-8 z-10 bg-white/95 backdrop-blur p-6 shadow-xl rounded-[4px] border border-primary/10 w-[320px] max-w-[calc(100vw-4rem)] min-h-[160px] transition-all duration-300 pointer-events-auto">
-              {activeLocation ? (
-                <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} key={activeLocation.id}>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex flex-col">
-                      <span className="text-[11px] uppercase tracking-[2px] font-bold">
-                        {activeLocation.country}
-                      </span>
-                      <span className="text-[9px] uppercase tracking-[1px] font-medium text-gray-400 whitespace-nowrap">
-                        {activeLocation.coords[0].toFixed(3)}° {activeLocation.coords[0] >= 0 ? 'N' : 'S'}, {activeLocation.coords[1].toFixed(3)}° {activeLocation.coords[1] >= 0 ? 'E' : 'W'}
-                      </span>
-                    </div>
-                    <div className="flex gap-1 shrink-0 pt-0.5">
-                      <button 
-                        onClick={() => {
-                          const currentIndex = locations.findIndex(l => l.id === activeLocation.id);
-                          const prevIndex = (currentIndex - 1 + locations.length) % locations.length;
-                          setActiveLocation(locations[prevIndex]);
-                        }}
-                        className="p-1 hover:bg-primary/10 rounded-full"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                      </button>
-                      <button 
-                        onClick={() => {
-                          const currentIndex = locations.findIndex(l => l.id === activeLocation.id);
-                          const nextIndex = (currentIndex + 1) % locations.length;
-                          setActiveLocation(locations[nextIndex]);
-                        }}
-                        className="p-1 hover:bg-primary/10 rounded-full"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                      </button>
-                    </div>
-                  </div>
-                  <h2 className="text-[24px] font-light mb-1 leading-tight">{activeLocation.title}</h2>
-                  <div className="mb-4"></div>
-                  <p className="text-[13px] opacity-80 leading-relaxed text-balance">
-                    {activeLocation.intro}
-                  </p>
-                </motion.div>
-              ) : (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="default" className="flex flex-col justify-center h-full">
-              <h2 className="text-[24px] font-light mb-2">{t("home.map.title")}</h2>
-              <p className="text-[13px] opacity-70 text-balance">
-                {t("home.map.desc")}
-              </p>
-            </motion.div>
-          )}
-        </div>
-        <div className="h-[45vh] min-h-[350px] md:min-h-[400px] w-full bg-primary/5 relative z-0">
-          {typeof window !== 'undefined' && (
-            <MapContainer 
-              center={[35.0, 60.0]} 
-              zoom={3} 
-              scrollWheelZoom={false} 
-              dragging={true}
-              touchZoom={true}
-              className="w-full h-full cursor-grab active:cursor-grabbing"
-              zoomControl={false}
-              attributionControl={false}
-            >
-              <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
-              />
-              <ZoomControl position="bottomright" />
-              <MapCenterer activeLocation={activeLocation} />
-              {locations.map((loc) => (
-                <Marker 
-                  key={loc.id} 
-                  position={loc.coords} 
-                  icon={schoolMarker}
-                  eventHandlers={{ click: () => setActiveLocation(loc) }}
-                />
-              ))}
-            </MapContainer>
-          )}
-        </div>
       </section>
 
       <BookingModal 
