@@ -81,11 +81,11 @@ export function RootLayout() {
           {/* Left: Contact */}
           <div className="flex flex-col">
             <h4 className="text-[11px] font-semibold uppercase tracking-[1px] mb-[15px] opacity-50">{t("footer.contact")}</h4>
-            <div className="flex flex-col gap-[10px] text-[14px]">
+            <div className="flex flex-col gap-[6px] text-[14px] leading-[1.4]">
               <a href="tel:+79001234567" className="hover:opacity-60 transition-opacity whitespace-nowrap">+7 (900) 123-45-67</a>
               <a href={`mailto:${t("footer.email")}`} className="hover:opacity-60 transition-opacity">{t("footer.email")}</a>
-              <p className="opacity-60 text-[12px] mt-2">{t("footer.locations.list")}</p>
-              <a href="#" className="text-[12px] underline underline-offset-4 mt-2 hover:opacity-60 transition-opacity">
+              <p className="hover:opacity-60 transition-opacity">{t("footer.locations.list")}</p>
+              <a href="#" className="underline underline-offset-4 mt-1 hover:opacity-60 transition-opacity">
                 {t("footer.support")}
               </a>
             </div>

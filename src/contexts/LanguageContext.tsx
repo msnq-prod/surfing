@@ -35,8 +35,8 @@ const translations: Record<string, Record<Language, string>> = {
   "home.features.item1.desc": { RU: "Сертифицированные ISA наставники с опытом катания и преподавания более 10 лет.", EN: "ISA certified mentors with over 10 years of surfing and teaching experience." },
   "home.features.item2.title": { RU: "Фокус", EN: "Focus" },
   "home.features.item2.desc": { RU: "Мини-группы до 4 человек для индивидуального подхода и безопасного прогресса.", EN: "Small groups of up to 4 people for an individual approach and safe progress." },
-  "home.features.item3.title": { RU: "Экипировка", EN: "Equipment" },
-  "home.features.item3.desc": { RU: "Свежие доски от локальных шейперов и технологичные лайкры для вашей защиты.", EN: "Fresh boards from local shapers and tech rashguards for your protection." },
+  "home.features.item3.title": { RU: "Доверие сообщества", EN: "Community trust" },
+  "home.features.item3.desc": { RU: "Более 1000 положительных отзывов и сотни постоянных клиентов, которые возвращаются к нам сезон за сезоном.", EN: "More than 1,000 positive reviews and hundreds of returning clients who come back season after season." },
 
   "home.team.title": { RU: "Наша Команда", EN: "Our Team" },
   "home.team.role.head": { RU: "Главный тренер", EN: "Head Coach" },
